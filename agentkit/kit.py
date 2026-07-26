@@ -63,9 +63,16 @@ class stage:
         return self
 
     def __exit__(self, exc_type, exc, tb):
-        if exc_type is not None:
-            return False
+        # Tag even on failure. A stage that raised half-way still created objects, and
+        # if they go untagged the next run cannot clean them up - it just builds a
+        # second set beside them under .001 names.
         self.created = [o for o in bpy.data.objects if o.name not in self.before]
+        if exc_type is not None:
+            for o in self.created:
+                o[STAGE_KEY] = self.name
+            print("[stage %s] FAILED after creating %d objects (tagged for cleanup)"
+                  % (self.name, len(self.created)))
+            return False
         tris = 0
         for o in self.created:
             o[STAGE_KEY] = self.name

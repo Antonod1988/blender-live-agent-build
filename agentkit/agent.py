@@ -13,6 +13,7 @@ Improvements over the bare socket client used for the carriage build:
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import socket
@@ -130,14 +131,19 @@ class Blender:
     def _kit_source(self) -> str:
         with open(self.kit_path, encoding="utf-8") as f:
             src = f.read()
-        # kit is injected as a module object so stage scripts can say kit.stage(...)
+        # kit is injected as a module object so stage scripts can say kit.stage(...).
+        # The source hash is stamped on the module: edit kit.py and the next call
+        # re-injects it. A stale cached kit once silently deleted a scene's materials.
+        digest = hashlib.sha1(src.encode("utf-8")).hexdigest()
         return (
             "import types, sys as _s\n"
-            "if 'kit' not in _s.modules:\n"
+            "_h = %r\n"
+            "if getattr(_s.modules.get('kit'), '__src_hash__', None) != _h:\n"
             "    _m = types.ModuleType('kit')\n"
+            "    _m.__src_hash__ = _h\n"
             "    exec(compile(%r, '<kit>', 'exec'), _m.__dict__)\n"
             "    _s.modules['kit'] = _m\n"
-            "kit = _s.modules['kit']\n" % src
+            "kit = _s.modules['kit']\n" % (digest, src)
         )
 
     @staticmethod
