@@ -2,3 +2,5 @@ __pycache__/
 *.pyc
 rec/
 scripts/renders/
+agentkit/_out/
+agentkit/__pycache__/

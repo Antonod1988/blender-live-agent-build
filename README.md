@@ -156,3 +156,17 @@ accidentally interfered with by a human hand.
 ## Licence
 
 MIT — see [LICENSE](LICENSE).
+
+---
+
+## The flow, hardened
+
+The carriage was built with a bare socket client. Everything that cost time during that
+build is fixed in [`agentkit/`](agentkit/): idempotent stages, dimension assertions, a
+four-view contact sheet, a guard that reverts a stray viewport scale, chunked rendering and
+vertex-instanced scatter. See [agentkit/README.md](agentkit/README.md).
+
+![contact sheet](renders/contact_sheet_example.png)
+
+*A contact sheet like this, generated in about a second, would have caught the barrel-shaped
+first body immediately — the side view makes proportions obvious.*
